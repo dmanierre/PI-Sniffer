@@ -1,0 +1,7 @@
+Handle Reboot Command
+
+Expand help text to explain how to use commands
+
+Test Scan time parameter on scan start and implement number of scans optional parameter
+
+Look for a better way to handle command parsing, currently a lot of if/else
