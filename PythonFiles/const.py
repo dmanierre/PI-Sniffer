@@ -5,7 +5,7 @@ MAC_PATTERN = "[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:
 ACTION_PATTERNS = {r"START_SCAN_\d\d_[0-9]+":"START_SCAN_TIME_COUNT", r"START_SCAN_DEFAULT_\d":"START_SCAN_DEFAULT_COUNT", r"^START_SCAN_\d\d$":"START_SCAN_TIME", r"^START_SCAN$":"START_SCAN_DEFAULT", "STOP_SCAN":"STOP_SCAN", "HELP":"HELP", "SHUTDOWN":"SHUTDOWN", "REBOOT":"REBOOT"}
 
 #Message Text
-HELPTEXT = "Commands:\n\tStart Scan \n\tStop Scan \n\tReboot \n\tTerminate"
+HELPTEXT = "Commands:\n     Start_Scan \n     Start_Scan_** \n     Start_Scan_default_* \n     Start_Scan_**_* \n     Stop_Scan \n     Reboot \n     Shutdown \n\n** Represents scan duration input and * represents scan count input"
 SCANNER_CONNECTED = "Scanner Connected"
 UNKNOWNMESSAGE = "Unknown Command, type Help to view a list of commands."
 REBOOT_MESSAGE = "Reboot request received. Restarting hardware"
@@ -17,7 +17,7 @@ SCAN_FINISHED = "Scan Finished"
 SCAN = "SCAN"
 START = "START"
 STOP = "STOP"
-TERMINATE = "TERMINATE"
+SHUTDOWN = "SHUTDOWN"
 HELP = "HELP"
 REBOOT = "REBOOT"
 UNKNOWN = "UNKNOWN"

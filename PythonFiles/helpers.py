@@ -31,7 +31,6 @@ def parseScanResults():
     return f"Devices Found: {len(macAddresses)}"
 
 def startWithTimeAndCount(packetText):
-    print("Start with Time and Count")
     action = const.START
     scanTime = packetText[2]
     scanRepetitions = packetText[3]
@@ -40,7 +39,6 @@ def startWithTimeAndCount(packetText):
     return packetActions
 
 def startWithCount(packetText):
-    print("Start with Count")
     action = const.START
     scanTime = const.DEFAULT_SCAN_TIME
     scanRepetitions = packetText[3]
@@ -49,7 +47,6 @@ def startWithCount(packetText):
     return packetActions
 
 def startWithTime(packetText):
-    print("Start with Time")
     action = const.START
     scanTime = packetText[2]
     scanRepetitions = const.CONTINUOUS
@@ -58,7 +55,6 @@ def startWithTime(packetText):
     return packetActions
 
 def startDefault(packetText):
-    print("Start Default")
     action = const.START
     scanTime = const.DEFAULT_SCAN_TIME
     scanRepetitions = const.CONTINUOUS
@@ -83,7 +79,7 @@ def helpMessage(packetText):
     return packetActions
 
 def shutdownAction(packetText):
-    action = const.TERMINATE
+    action = const.SHUTDOWN
     scanTime = ""
     scanRepetitions = ""
 
@@ -101,7 +97,4 @@ def rebootAction(packetText):
 ACTION_FUNCTIONS = {"START_SCAN_TIME_COUNT":startWithTimeAndCount, "START_SCAN_DEFAULT_COUNT":startWithCount, "START_SCAN_TIME":startWithTime, "START_SCAN_DEFAULT":startDefault, "STOP_SCAN":stopScan, "HELP":helpMessage, "SHUTDOWN":shutdownAction, "REBOOT":rebootAction}
 
 #Update help text
-#implement reboot command
 #handle single digit scan times and double digit scan counts
-#update uses of terminate to shutdown
-#have shutdown turn off pi

@@ -1,5 +1,6 @@
 import const
 import helpers
+import os
 import meshtastic
 import meshtastic.serial_interface
 from pubsub import pub
@@ -29,7 +30,7 @@ def startScanner():
     global scanRepetitions
 
     #While the user is not shutting down the program
-    while action != const.TERMINATE:
+    while action != const.SHUTDOWN:
         
         #Notify the user if they enter an unknown command
         if action == const.UNKNOWN:
@@ -61,13 +62,15 @@ def startScanner():
         #Reboot the Pi and relaunch the program
         if action == const.REBOOT:
             interface.sendText(const.REBOOT_MESSAGE)
-            sleep(2)
+            sleep(5)
             interface.close()
-            #OS command to reboot PI
+            os.system("sudo reboot")
+            
     
     interface.sendText(const.SHUT_DOWN_MESSAGE)
-    sleep(2)
+    sleep(5)
     interface.close()
+    os.system("sudo shutdown now")
    
 
 
