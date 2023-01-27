@@ -17,17 +17,14 @@ def startConnection():
 def onPacketReceive(packet, interface):
     global action
     global scanTime
-    global scanRepetitions
     packetActions = helpers.getActionFromPacket(packet)
     action = packetActions[0]
     scanTime = packetActions[1]
-    scanRepetitions = packetActions[2]
 
 #Handles actions from users
 def startScanner():
     global action
     global scanTime
-    global scanRepetitions
 
     #While the user is not shutting down the program
     while action != const.SHUTDOWN:
@@ -39,15 +36,9 @@ def startScanner():
         
         #Run scan while action is Start
         while action == const.START:
-            if(scanRepetitions != const.CONTINUOUS):
-                for x in range(int(scanRepetitions)):
-                    helpers.startScan(scanTime)
-                    interface.sendText(helpers.parseScanResults())
-                action = ""
-                interface.sendText(const.SCAN_FINISHED)
-            else:
-                helpers.startScan(scanTime)
-                interface.sendText(helpers.parseScanResults())
+            helpers.startScan(scanTime)
+            interface.sendText(helpers.parseScanResults())
+            action = ""
         
         #Stop Scan and notify user when action is Stop
         while action == const.STOP:
@@ -78,6 +69,5 @@ if __name__ == '__main__':
     interface = meshtastic.serial_interface.SerialInterface()
     action = ""
     scanTime = const.DEFAULT_SCAN_TIME
-    scanRepetitions = ""
     startConnection()
     startScanner()
