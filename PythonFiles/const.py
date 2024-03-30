@@ -1,5 +1,13 @@
 #Constants that will be used throughout the program
 
+#This flag will determine if the Meshtastic device will be connected by USB or wirelessly via MQTT
+USEMQTT = False
+
+#MQTT Broker Settings
+BROKERADDRESS = ""
+TOPIC = "MESHSCANNER"
+MESHDEVICEID = ""
+
 #Regex Patterns
 MAC_PATTERN = "[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9][a-zA-Z0-9]"
 ACTION_PATTERNS = {r"SCAN_\d\d$":"SCAN_TIME", "SCAN":"SCAN", "STOP_SCAN":"STOP_SCAN", "HELP":"HELP", "SHUTDOWN":"SHUTDOWN", "REBOOT":"REBOOT"}

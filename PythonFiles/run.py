@@ -5,13 +5,24 @@ import meshtastic
 import meshtastic.serial_interface
 from pubsub import pub
 from time import sleep
+import paho.mqtt.client as paho
+import json
+import chardet
 
-#Notify user of successful Meshtastic connection and subscribe to listener for Meshtastic packets
-def startConnection():
+#Notify user of successful Meshtastic serial connection and subscribe to listener for Meshtastic packets
+def startSerialConnection():
     interface.sendText(const.SCANNER_CONNECTED)
 
     #Subscribe to listener for Meshtastic packets
     pub.subscribe(onPacketReceive, "meshtastic.receive.text")
+
+#Notify user of successful Meshtastic MQTT broker connection and subscribe to topic for Meshtastic packets
+def startMQTTConnection():
+    interface.sendText(const.SCANNER_CONNECTED)
+
+    #Subscribe to listener for Meshtastic packets
+    pub.subscribe(onPacketReceive, "meshtastic.receive.text")
+
 
 #Handle incoming Meshtastic packets and convert to actions
 def onPacketReceive(packet, interface):
@@ -66,8 +77,13 @@ def startScanner():
 
 
 if __name__ == '__main__':
-    interface = meshtastic.serial_interface.SerialInterface()
     action = ""
     scanTime = const.DEFAULT_SCAN_TIME
-    startConnection()
+
+    if const.USEMQTT:
+        startMQTTConnection()
+    else:
+        interface = meshtastic.serial_interface.SerialInterface()
+        startSerialConnection()
+
     startScanner()
