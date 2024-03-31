@@ -1,9 +1,5 @@
 #Constants that will be used throughout the program
 
-
-
-
-Move config settings to new file UserSettings.py
 #Regex Patterns
 MAC_PATTERN = "[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9][a-zA-Z0-9]"
 ACTION_PATTERNS = {r"SCAN_\d\d$":"SCAN_TIME", "SCAN":"SCAN", "STOP_SCAN":"STOP_SCAN", "HELP":"HELP", "SHUTDOWN":"SHUTDOWN", "REBOOT":"REBOOT"}

@@ -1,5 +1,6 @@
 import const
 import helpers
+import userSettings
 import os
 import meshtastic
 import meshtastic.serial_interface
@@ -9,20 +10,53 @@ import paho.mqtt.client as paho
 import json
 import chardet
 
+#Notify user of successful Meshtastic MQTT broker connection and subscribe to topic for Meshtastic packets
+def startMQTTConnection():
+    client.username_pw_set(username=userSettings.MQTTUSERNAME,password=userSettings.MQTTPASSWORD)
+    client.on_message = on_message
+    client.on_publish = on_publish
+
+    client.connect(userSettings.BROKERADDRESS, 1883, 60)
+
+    message = {
+    "from":4146369620,
+    "channel":0,
+    "type":"sendtext",
+    "payload": "Connection Established"
+    }
+
+    client.publish(f"{userSettings.TOPIC}/2/json/mqtt", payload=json.dumps(message))
+
+    if userSettings.ENABLEPRINTS:
+        print(f"Connection started on channel {userSettings.TOPIC}/2/json/mqtt")
+    
+def on_message(mosq, obj, msg):
+    encoding = chardet.detect(msg.payload)['encoding']
+    dataStr = msg.payload.decode(encoding)
+
+    if dataStr:
+        data = json.loads(msg.payload)
+        if "payload" in data.keys():
+            if "text" in data["payload"].keys():
+                message = data['payload']['text']
+                print(message)
+
+    else:
+        print('Empty: ' + dataStr)
+        print(msg.payload)
+
+    mosq.publish('pong', 'ack', 0)
+
+def on_publish(mosq, obj, mid, reason_codes, properties):
+    pass
+
+
 #Notify user of successful Meshtastic serial connection and subscribe to listener for Meshtastic packets
 def startSerialConnection():
     interface.sendText(const.SCANNER_CONNECTED)
 
     #Subscribe to listener for Meshtastic packets
     pub.subscribe(onPacketReceive, "meshtastic.receive.text")
-
-#Notify user of successful Meshtastic MQTT broker connection and subscribe to topic for Meshtastic packets
-def startMQTTConnection():
-    interface.sendText(const.SCANNER_CONNECTED)
-
-    #Subscribe to listener for Meshtastic packets
-    pub.subscribe(onPacketReceive, "meshtastic.receive.text")
-
 
 #Handle incoming Meshtastic packets and convert to actions
 def onPacketReceive(packet, interface):
@@ -80,7 +114,8 @@ if __name__ == '__main__':
     action = ""
     scanTime = const.DEFAULT_SCAN_TIME
 
-    if const.USEMQTT:
+    if userSettings.USEMQTT:
+        client = paho.Client(paho.CallbackAPIVersion.VERSION2)
         startMQTTConnection()
     else:
         interface = meshtastic.serial_interface.SerialInterface()
