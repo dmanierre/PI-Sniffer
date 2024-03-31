@@ -1,13 +1,9 @@
 #Constants that will be used throughout the program
 
-#This flag will determine if the Meshtastic device will be connected by USB or wirelessly via MQTT
-USEMQTT = False
 
-#MQTT Broker Settings
-BROKERADDRESS = ""
-TOPIC = "MESHSCANNER"
-MESHDEVICEID = ""
 
+
+Move config settings to new file UserSettings.py
 #Regex Patterns
 MAC_PATTERN = "[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9]+:[a-zA-Z0-9][a-zA-Z0-9]"
 ACTION_PATTERNS = {r"SCAN_\d\d$":"SCAN_TIME", "SCAN":"SCAN", "STOP_SCAN":"STOP_SCAN", "HELP":"HELP", "SHUTDOWN":"SHUTDOWN", "REBOOT":"REBOOT"}
@@ -32,5 +28,4 @@ UNKNOWN = "UNKNOWN"
 
 #Misc
 PROBE_REQUEST = "Probe Request"
-PI_ID = "802.11 228"
 DEFAULT_SCAN_TIME = "20"

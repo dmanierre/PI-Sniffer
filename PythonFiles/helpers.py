@@ -13,7 +13,7 @@ def getActionFromPacket(packet):
     return packetActions
 
 def startScan(scanTime):
-    command = f"sudo tshark -i mon1 -a duration:{scanTime} > scanResults.txt"
+    command = f"sudo tshark -i {const.WIFIINTERFACE} -a duration:{scanTime} > scanResults.txt"
     os.system(command)
 
 def parseScanResults():
