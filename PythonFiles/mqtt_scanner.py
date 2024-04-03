@@ -1,29 +1,34 @@
 import paho.mqtt.client as paho
-import json
+from time import sleep
+import os
 import user_settings
-import helpers
+import PythonFiles.utils as utils
 import const
+import mqtt_helper
 
 
 #Notify user of successful Meshtastic MQTT broker connection and subscribe to topic for Meshtastic packets
-def startMQTTConnection():
+def startMQTTScanner():
     global action
     global scanTime
+    
+    action = ""
+    scanTime = const.DEFAULT_SCAN_TIME
     
     #Set client info and bind callbacks
     paho.Client.connected_flag = False
     client = paho.Client(paho.CallbackAPIVersion.VERSION2)
     client.username_pw_set(username=user_settings.MQTTUSERNAME,password=user_settings.MQTTPASSWORD)
-    client.on_connect = on_connect
-    client.on_message = on_message
-    client.on_publish = on_publish
+    client.on_connect = mqtt_helper.on_connect
+    client.on_message = mqtt_helper.on_message
+    client.on_publish = mqtt_helper.on_publish
 
     #Connect to the broker
     client.connect(user_settings.BROKERADDRESS, 1883, 60)
     client.loop_start()
 
     #Send successful connection message to the mesh
-    client.publish(f"{user_settings.TOPIC}/2/json/mqtt", helpers.buildMqttMessage(const.SCANNER_CONNECTED))
+    client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.SCANNER_CONNECTED))
 
     #Subscribe to the mesh device channel
     client.subscribe(f"{user_settings.TOPIC}/2/json/mqtt/{user_settings.MESHDEVICEID}",0)
@@ -36,58 +41,36 @@ def startMQTTConnection():
         
         #Notify the user if they enter an unknown command
         if action == const.UNKNOWN:
-            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", helpers.buildMqttMessage(const.UNKNOWNMESSAGE))
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.UNKNOWNMESSAGE))
             action = ""
         
         #Run scan while action is Start
         while action == const.START:
-            helpers.startScan(scanTime)
-            interface.sendText(helpers.parseScanResults())
+            utils.startScan(scanTime)
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(utils.parseScanResults()))
             action = ""
         
         #Stop Scan and notify user when action is Stop
         while action == const.STOP:
-            interface.sendText(const.SCAN_STOPPED)
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.SCAN_STOPPED))
             action = ""
 
         #Send help text to user
         while action == const.HELP:
-            interface.sendText(const.HELPTEXT)
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.HELPTEXT))
             action = ""
         
         #Reboot the Pi and relaunch the program
         if action == const.REBOOT:
-            interface.sendText(const.REBOOT_MESSAGE)
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.REBOOT_MESSAGE))
             sleep(5)
-            interface.close()
+            client.disconnect()
+            client.loop_stop()
             os.system("sudo reboot")
             
-    
-    interface.sendText(const.SHUT_DOWN_MESSAGE)
+    client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.SHUT_DOWN_MESSAGE))
     sleep(5)
-    interface.close()
+    client.disconnect()
+    client.loop_stop()
     os.system("sudo shutdown now")
 
-    helpers.startScanner()
-
-def on_message(mosq, obj, msg):
-    global action
-    global scanTime
-
-    packetActions = helpers.getActionFromMQTTPacket(msg)
-    action = packetActions[0]
-    scanTime = packetActions[1]
-
-    mosq.publish('pong', 'ack', 0)
-
-def on_connect(client, userdata, flags, rc, properties):
-    if rc==0:
-        client.connected_flag = True
-        if user_settings.ENABLEPRINTS:
-            print("Connected to broker")
-    else:
-        if user_settings.ENABLEPRINTS:
-            print("Unable to connect to broker")
-
-def on_publish(mosq, obj, mid, reason_codes, properties):
-    pass
