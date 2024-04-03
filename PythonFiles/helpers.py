@@ -1,8 +1,54 @@
 import const
+import user_settings
 import os
 import re
+import chardet
+import json
+from time import sleep
 
-def getActionFromPacket(packet):
+#Handles actions from users
+def startScanner():
+    global action
+    global scanTime
+
+    #While the user is not shutting down the program
+    while action != const.SHUTDOWN:
+        
+        #Notify the user if they enter an unknown command
+        if action == const.UNKNOWN:
+            interface.sendText(const.UNKNOWNMESSAGE)
+            action = ""
+        
+        #Run scan while action is Start
+        while action == const.START:
+            helpers.startScan(scanTime)
+            interface.sendText(helpers.parseScanResults())
+            action = ""
+        
+        #Stop Scan and notify user when action is Stop
+        while action == const.STOP:
+            interface.sendText(const.SCAN_STOPPED)
+            action = ""
+
+        #Send help text to user
+        while action == const.HELP:
+            interface.sendText(const.HELPTEXT)
+            action = ""
+        
+        #Reboot the Pi and relaunch the program
+        if action == const.REBOOT:
+            interface.sendText(const.REBOOT_MESSAGE)
+            sleep(5)
+            interface.close()
+            os.system("sudo reboot")
+            
+    
+    interface.sendText(const.SHUT_DOWN_MESSAGE)
+    sleep(5)
+    interface.close()
+    os.system("sudo shutdown now")
+
+def getActionFromSerialPacket(packet):
     packetText = packet.get("decoded").get("text").upper().split("_")
     for key in const.ACTION_PATTERNS:
         if re.search(key,packet.get("decoded").get("text").upper()):
@@ -11,6 +57,35 @@ def getActionFromPacket(packet):
     
     packetActions = [const.UNKNOWN,"",""]
     return packetActions
+
+def getActionFromMQTTPacket(msg):
+    encoding = chardet.detect(msg.payload)['encoding']
+    dataStr = msg.payload.decode(encoding)
+
+    if dataStr:
+        data = json.loads(msg.payload)
+        if "payload" in data.keys():
+            if "text" in data["payload"].keys():
+                message = data['payload']['text']
+                if user_settings.ENABLEPRINTS:
+                    print(f"Message received: {message}")
+                packetText = message.upper().split("_")
+                for key in const.ACTION_PATTERNS:
+                    if re.search(key,message.upper()):
+                        parser = ACTION_FUNCTIONS.get(const.ACTION_PATTERNS.get(key))
+                        return parser(packetText)
+
+    else:
+        if user_settings.ENABLEPRINTS:
+            print("Empty message recieved")
+        packetActions = [const.UNKNOWN,"",""]
+        return packetActions    
+    
+    if user_settings.ENABLEPRINTS:
+        print("No matching command found")
+
+    packetActions = [const.UNKNOWN,"",""]
+    return packetActions 
 
 def startScan(scanTime):
     command = f"sudo tshark -i {const.WIFIINTERFACE} -a duration:{scanTime} > scanResults.txt"
@@ -29,6 +104,17 @@ def parseScanResults():
             
     FileHandler.close()
     return f"Devices Found: {len(macAddresses)}"
+
+def buildMqttMessage(message):
+    messageBody = {
+    "from":4146369620,
+    "channel":0,
+    "type":"sendtext",
+    "payload": message
+    }
+
+    return json.dumps(messageBody)
+
 
 def startWithTime(packetText):
     action = const.START
