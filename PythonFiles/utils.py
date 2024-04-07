@@ -1,10 +1,11 @@
 import const
 import os
 import re
+import user_settings
 from time import sleep
 
 def startScan(scanTime):
-    command = f"sudo tshark -i {const.WIFIINTERFACE} -a duration:{scanTime} > scanResults.txt"
+    command = f"sudo tshark -i {user_settings.WIFIINTERFACE} -a duration:{scanTime} > scanResults.txt"
     os.system(command)
 
 def parseScanResults():

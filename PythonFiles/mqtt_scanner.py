@@ -2,7 +2,7 @@ import paho.mqtt.client as paho
 from time import sleep
 import os
 import user_settings
-import PythonFiles.utils as utils
+import utils
 import const
 import mqtt_helper
 
@@ -34,41 +34,41 @@ def startMQTTScanner():
     client.subscribe(f"{user_settings.TOPIC}/2/json/mqtt/{user_settings.MESHDEVICEID}",0)
 
     if user_settings.ENABLEPRINTS:
-        print(f"Subscribed to channel {user_settings.TOPIC}/2/json/mqtt")
+        print(f"Subscribed to channel {user_settings.TOPIC}/2/json/mqtt/{user_settings.MESHDEVICEID}")
 
     #While the user is not shutting down the program
     while action != const.SHUTDOWN:
         
         #Notify the user if they enter an unknown command
         if action == const.UNKNOWN:
-            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.UNKNOWNMESSAGE))
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.UNKNOWNMESSAGE))
             action = ""
         
         #Run scan while action is Start
         while action == const.START:
             utils.startScan(scanTime)
-            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(utils.parseScanResults()))
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(utils.parseScanResults()))
             action = ""
         
         #Stop Scan and notify user when action is Stop
         while action == const.STOP:
-            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.SCAN_STOPPED))
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.SCAN_STOPPED))
             action = ""
 
         #Send help text to user
         while action == const.HELP:
-            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.HELPTEXT))
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.HELPTEXT))
             action = ""
         
         #Reboot the Pi and relaunch the program
         if action == const.REBOOT:
-            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.REBOOT_MESSAGE))
+            client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.REBOOT_MESSAGE))
             sleep(5)
             client.disconnect()
             client.loop_stop()
             os.system("sudo reboot")
             
-    client.publish(f"{user_settings.TOPIC}/2/json/mqtt", utils.buildMqttMessage(const.SHUT_DOWN_MESSAGE))
+    client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.SHUT_DOWN_MESSAGE))
     sleep(5)
     client.disconnect()
     client.loop_stop()

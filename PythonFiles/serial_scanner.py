@@ -1,7 +1,7 @@
 import meshtastic
 import meshtastic.serial_interface
 import const
-import PythonFiles.utils as utils
+import  utils
 from pubsub import pub
 from time import sleep
 import os

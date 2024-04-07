@@ -1,4 +1,3 @@
-import const
 import user_settings
 import mqtt_scanner
 import serial_scanner

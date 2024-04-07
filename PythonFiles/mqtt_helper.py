@@ -1,4 +1,4 @@
-import PythonFiles.utils as utils
+import utils
 import const
 import json
 import user_settings
@@ -9,7 +9,7 @@ def on_message(mosq, obj, msg):
     global action
     global scanTime
 
-    packetActions = utils.getActionFromMQTTPacket(msg)
+    packetActions = getActionFromMQTTPacket(msg)
     action = packetActions[0]
     scanTime = packetActions[1]
 
@@ -28,7 +28,9 @@ def on_publish(mosq, obj, mid, reason_codes, properties):
     pass
 
 def buildMqttMessage(message):
+
     messageBody = {
+    "id":const.MESHTASTIC_MESSAGE_ID,
     "from":4146369620,
     "channel":0,
     "type":"sendtext",
@@ -43,16 +45,21 @@ def getActionFromMQTTPacket(msg):
 
     if dataStr:
         data = json.loads(msg.payload)
-        if "payload" in data.keys():
-            if "text" in data["payload"].keys():
-                message = data['payload']['text']
+        if "id" in data.keys():
+            if data["id"] != const.MESHTASTIC_MESSAGE_ID:
+                if "payload" in data.keys():
+                    if "text" in data["payload"].keys():
+                        message = data['payload']['text']
+                        if user_settings.ENABLEPRINTS:
+                            print(f"Message received: {message}")
+                        packetText = message.upper().split("_")
+                        for key in const.ACTION_PATTERNS:
+                            if re.search(key,message.upper()):
+                                parser = utils.ACTION_FUNCTIONS.get(const.ACTION_PATTERNS.get(key))
+                                return parser(packetText)
+            else:
                 if user_settings.ENABLEPRINTS:
-                    print(f"Message received: {message}")
-                packetText = message.upper().split("_")
-                for key in const.ACTION_PATTERNS:
-                    if re.search(key,message.upper()):
-                        parser = utils.ACTION_FUNCTIONS.get(const.ACTION_PATTERNS.get(key))
-                        return parser(packetText)
+                    print("Duplicate packet recieved")
 
     else:
         if user_settings.ENABLEPRINTS:
