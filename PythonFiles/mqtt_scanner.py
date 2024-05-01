@@ -41,33 +41,45 @@ def startMQTTScanner():
         
         #Notify the user if they enter an unknown command
         if action == const.UNKNOWN:
+            if user_settings.ENABLEPRINTS:
+                print(f"Sending Message for command:{const.UNKNOWN}")
             client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.UNKNOWNMESSAGE))
             action = ""
         
         #Run scan while action is Start
         while action == const.START:
             utils.startScan(scanTime)
+            if user_settings.ENABLEPRINTS:
+                print(f"Sending Message for command:{const.START}")
             client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(utils.parseScanResults()))
             action = ""
         
         #Stop Scan and notify user when action is Stop
         while action == const.STOP:
+            if user_settings.ENABLEPRINTS:
+                print(f"Sending Message for command:{const.STOP}")
             client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.SCAN_STOPPED))
             action = ""
 
         #Send help text to user
         while action == const.HELP:
+            if user_settings.ENABLEPRINTS:
+                print(f"Sending Message for command:{const.HELP}")
             client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.HELPTEXT))
             action = ""
         
         #Reboot the Pi and relaunch the program
         if action == const.REBOOT:
+            if user_settings.ENABLEPRINTS:
+                print(f"Sending Message for command:{const.REBOOT}")
             client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.REBOOT_MESSAGE))
             sleep(5)
             client.disconnect()
             client.loop_stop()
             os.system("sudo reboot")
-            
+
+    if user_settings.ENABLEPRINTS:
+        print(f"Sending Message for command:{const.SHUTDOWN}")
     client.publish(f"{user_settings.TOPIC}/2/json/mqtt", mqtt_helper.buildMqttMessage(const.SHUT_DOWN_MESSAGE))
     sleep(5)
     client.disconnect()

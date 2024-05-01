@@ -3,6 +3,7 @@ import const
 import json
 import user_settings
 import chardet
+import mqtt_scanner
 import re
 
 def on_message(mosq, obj, msg):
@@ -10,8 +11,10 @@ def on_message(mosq, obj, msg):
     global scanTime
 
     packetActions = getActionFromMQTTPacket(msg)
-    action = packetActions[0]
-    scanTime = packetActions[1]
+
+    if packetActions[0] != "Ignore":
+        mqtt_scanner.action = packetActions[0]
+        mqtt_scanner.scanTime = packetActions[1]
 
     mosq.publish('pong', 'ack', 0)
 
@@ -30,8 +33,7 @@ def on_publish(mosq, obj, mid, reason_codes, properties):
 def buildMqttMessage(message):
 
     messageBody = {
-    "id":const.MESHTASTIC_MESSAGE_ID,
-    "from":4146369620,
+    "from":const.MESHTASTIC_FROM,
     "channel":0,
     "type":"sendtext",
     "payload": message
@@ -45,8 +47,8 @@ def getActionFromMQTTPacket(msg):
 
     if dataStr:
         data = json.loads(msg.payload)
-        if "id" in data.keys():
-            if data["id"] != const.MESHTASTIC_MESSAGE_ID:
+        if "from" in data.keys():
+            if data["from"] != const.MESHTASTIC_FROM:
                 if "payload" in data.keys():
                     if "text" in data["payload"].keys():
                         message = data['payload']['text']
@@ -60,6 +62,8 @@ def getActionFromMQTTPacket(msg):
             else:
                 if user_settings.ENABLEPRINTS:
                     print("Duplicate packet recieved")
+                packetActions = ["Ignore"]
+                return packetActions
 
     else:
         if user_settings.ENABLEPRINTS:

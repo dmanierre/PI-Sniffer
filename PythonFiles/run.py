@@ -8,7 +8,7 @@ if __name__ == '__main__':
     if user_settings.ENABLEPRINTS:
         print("Waiting for system setup")
     #Give the system time to setup and let the Mesh device connect to the hotspot
-    sleep(20)
+    sleep(user_settings.BOOT_TIME)
     
     if user_settings.ENABLEPRINTS:
         print("Starting Scanner")

@@ -30,3 +30,6 @@ WIFIINTERFACE = "wlan1"
 #PI Packet Id
 PI_ID = "802.11 228"
 
+#Time before the scanner attempts to initaite connections
+BOOT_TIME = 20
+
