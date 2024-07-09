@@ -33,7 +33,7 @@ def on_publish(mosq, obj, mid, reason_codes, properties):
 def buildMqttMessage(message):
 
     messageBody = {
-    "from":const.MESHTASTIC_FROM,
+    "from":user_settings.MESHDECIMALID,
     "channel":0,
     "type":"sendtext",
     "payload": message
@@ -48,7 +48,7 @@ def getActionFromMQTTPacket(msg):
     if dataStr:
         data = json.loads(msg.payload)
         if "from" in data.keys():
-            if data["from"] != const.MESHTASTIC_FROM:
+            if data["from"] != user_settings.MESHDECIMALID:
                 if "payload" in data.keys():
                     if "text" in data["payload"].keys():
                         message = data['payload']['text']

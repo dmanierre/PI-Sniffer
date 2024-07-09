@@ -14,6 +14,9 @@ TOPIC = "MESHSCANNER"
 #This will be a string specific to each mestastic device. ex: !f7249454
 MESHDEVICEID = "!f7249454"
 
+#The decimal conversion of the above Id (convert without the !)
+MESHDECIMALID = "4146369620"
+
 #This is the Username created when setting up Mosquitto on the Pi
 MQTTUSERNAME = "MeshDrone"
 
